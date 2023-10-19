@@ -8,14 +8,14 @@
 using namespace std;
 
 const int Nr = 10; // AES-128有10轮加密
-array<array<unsigned long int, 4>, 4> key = {};
-array<array<unsigned long int, 4>, 4> plaintext = {};
-array<array<unsigned long int, 4>, 44> w = {};
-array<array<unsigned long int, 4>, Nr> Rcon = {};
-array<array<unsigned long int, 4>, 4> ciphertext = {};
+array<array<int, 4>, 4> key = {};
+array<array<int, 4>, 4> plaintext = {};
+array<array<int, 4>, 44> w = {};
+array<array<int, 4>, Nr> Rcon = {};
+array<array<int, 4>, 4> ciphertext = {};
 
 // AES S-Box
-const array<unsigned long int, 256> SBox = {
+const array<int, 256> SBox = {
     0x63, 0x7C, 0x77, 0x7B, 0xF2, 0x6B, 0x6F, 0xC5, 0x30, 0x01, 0x67, 0x2B, 0xFE, 0xD7, 0xAB, 0x76,
     0xCA, 0x82, 0xC9, 0x7D, 0xFA, 0x59, 0x47, 0xF0, 0xAD, 0xD4, 0xA2, 0xAF, 0x9C, 0xA4, 0x72, 0xC0,
     0xB7, 0xFD, 0x93, 0x26, 0x36, 0x3F, 0xF7, 0xCC, 0x34, 0xA5, 0xE5, 0xF1, 0x71, 0xD8, 0x31, 0x15,
@@ -35,7 +35,7 @@ const array<unsigned long int, 256> SBox = {
 };
 
 //【完结】处理输入
-void put_in(array<array<unsigned long int, 4>, 4>& result, string str)//处理输入
+void put_in(array<array<int, 4>, 4>& result, string str)//处理输入
 {
     vector<string> pairs;
     for (int i = 0; i < 32; i += 2) {
@@ -56,7 +56,7 @@ void put_in(array<array<unsigned long int, 4>, 4>& result, string str)//处理输入
 }
 
 //【完结】初始轮
-void InitialRound(array<array<unsigned long int, 4>, 4>&plaintext, array<array<unsigned long int, 4>, 4>&key, array<array<unsigned long int, 4>, 4>&result)
+void InitialRound(array<array<int, 4>, 4>&plaintext, array<array<int, 4>, 4>&key, array<array<int, 4>, 4>&result)
 {
     for (int i = 0; i < 4; i++)
     {
@@ -68,7 +68,7 @@ void InitialRound(array<array<unsigned long int, 4>, 4>&plaintext, array<array<u
 }
 
 //【完结】字节代换
-void SubBytes(array<array<unsigned long int, 4>, 4>& input, array<array<unsigned long int, 4>, 4>& result)
+void SubBytes(array<array<int, 4>, 4>& input, array<array<int, 4>, 4>& result)
 {
     for (int i = 0; i < 4; i++)
     {
@@ -80,9 +80,9 @@ void SubBytes(array<array<unsigned long int, 4>, 4>& input, array<array<unsigned
 }
 
 //【完结】行移位
-void ShiftRows(array<array<unsigned long int, 4>, 4>& input)
+void ShiftRows(array<array<int, 4>, 4>& input)
 {
-    unsigned long int temp = input[1][0];
+    int temp = input[1][0];
     input[1][0] = input[1][1];
     input[1][1] = input[1][2];
     input[1][2] = input[1][3];
@@ -103,35 +103,35 @@ void ShiftRows(array<array<unsigned long int, 4>, 4>& input)
 }
 
 
-unsigned long int mul2(unsigned long int value) {
+int mul2(int value) {
     if (value < 0x80) {
-        unsigned long int temp = ((unsigned long int)value << 1) & 0xff;
+        int temp = ((int)value << 1) & 0xff;
         return temp;
     }
     else {
-        unsigned long int temp = ((unsigned long int)value << 1) & 0xff;
+        int temp = ((int)value << 1) & 0xff;
         temp = temp ^ 0x1b;
         return temp;
     }
 }
 
-unsigned long int mul3(unsigned long int value) {
-    return static_cast<unsigned long int>(mul2(value) ^ value);
+int mul3(int value) {
+    return static_cast<int>(mul2(value) ^ value);
 }
 
 //【完结】列混淆
-void MixColumns(array<array<unsigned long int, 4>, 4>& input)
+void MixColumns(array<array<int, 4>, 4>& input)
 { 
-    array<array<unsigned long int, 4>, 4>temp = {};
+    array<array<int, 4>, 4>temp = {};
 
     for (int i = 0; i < 4; i++)
     {
-        unsigned long int a = input[0][i];
-        unsigned long int b = input[1][i];
-        unsigned long int c = input[2][i];
-        unsigned long int d = input[3][i];
-        unsigned long int e = mul2(a);
-        unsigned long int f = mul3(b);
+        int a = input[0][i];
+        int b = input[1][i];
+        int c = input[2][i];
+        int d = input[3][i];
+        int e = mul2(a);
+        int f = mul3(b);
         temp[0][i]=mul2(input[0][i]) ^ mul3(input[1][i]) ^ input[2][i] ^ input[3][i];
     }
     for (int i = 0; i < 4; i++)
@@ -151,7 +151,7 @@ void MixColumns(array<array<unsigned long int, 4>, 4>& input)
 }
 
 //【待验证】轮密钥异或
-void AddRoundKey(array<array<unsigned long int, 4>, 4>& input, array<array<unsigned long int, 4>, 4>& key, array<array<unsigned long int, 4>, 4>& result)
+void AddRoundKey(array<array<int, 4>, 4>& input, array<array<int, 4>, 4>& key, array<array<int, 4>, 4>& result)
 {
     for (int i = 0; i < 4; i++)
     {
@@ -178,7 +178,7 @@ void SetRocn()
 }
 
 //【完结】密钥扩展
-void KeyExpansion(array<array<unsigned long int, 4>, 4>& key, array<array<unsigned long int, 4>, 44>& w)
+void KeyExpansion(array<array<int, 4>, 4>& key, array<array<int, 4>, 44>& w)
 {
     SetRocn();
     for (int i = 0; i < 4; i++)
@@ -220,7 +220,7 @@ int main() {
     put_in(plaintext,str_plaintext);
 
     KeyExpansion(key, w);
-    array<array<unsigned long int, 4>, 4> temp = {};
+    array<array<int, 4>, 4> temp = {};
 
     InitialRound(plaintext, key, temp);
 
@@ -230,8 +230,8 @@ int main() {
         ShiftRows(temp);
         MixColumns(temp);
 
-        array<array<unsigned long int, 4>, 4> roundKeytemp = { w[round*4], w[round*4+1], w[round*4 + 2], w[round*4 + 3] };
-        array<array<unsigned long int, 4>, 4> roundKey = { w[round * 4], w[round * 4 + 1], w[round * 4 + 2], w[round * 4 + 3] };
+        array<array<int, 4>, 4> roundKeytemp = { w[round*4], w[round*4+1], w[round*4 + 2], w[round*4 + 3] };
+        array<array<int, 4>, 4> roundKey = { w[round * 4], w[round * 4 + 1], w[round * 4 + 2], w[round * 4 + 3] };
         for (int i = 0; i < 4; i++)
         {
             for (int j = 0; j < 4; j++)
@@ -246,8 +246,8 @@ int main() {
     SubBytes(temp, temp);
     ShiftRows(temp);
 
-    array<array<unsigned long int, 4>, 4> roundKeytemp = { w[Nr * 4], w[Nr * 4 + 1], w[Nr * 4 + 2], w[Nr * 4 + 3] };
-    array<array<unsigned long int, 4>, 4> roundKey = { w[Nr * 4], w[Nr * 4 + 1], w[Nr * 4 + 2], w[Nr * 4 + 3] };
+    array<array<int, 4>, 4> roundKeytemp = { w[Nr * 4], w[Nr * 4 + 1], w[Nr * 4 + 2], w[Nr * 4 + 3] };
+    array<array<int, 4>, 4> roundKey = { w[Nr * 4], w[Nr * 4 + 1], w[Nr * 4 + 2], w[Nr * 4 + 3] };
     for (int i = 0; i < 4; i++)
     {
         for (int j = 0; j < 4; j++)
