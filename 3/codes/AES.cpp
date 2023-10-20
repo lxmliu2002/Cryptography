@@ -126,12 +126,6 @@ void MixColumns(array<array<int, 4>, 4>& input)
 
     for (int i = 0; i < 4; i++)
     {
-        int a = input[0][i];
-        int b = input[1][i];
-        int c = input[2][i];
-        int d = input[3][i];
-        int e = mul2(a);
-        int f = mul3(b);
         temp[0][i]=mul2(input[0][i]) ^ mul3(input[1][i]) ^ input[2][i] ^ input[3][i];
     }
     for (int i = 0; i < 4; i++)
