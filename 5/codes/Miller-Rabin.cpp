@@ -3,9 +3,9 @@
 
 using namespace std;
 
-unsigned long long int mul(unsigned long long int a,unsigned long long int b,unsigned long long int n)
+uint64_t mul(uint64_t a,uint64_t b,uint64_t n)
 {
-    unsigned long long int ans = 0;
+    uint64_t ans = 0;
     while(b)
     {
         if(b & 1)
@@ -18,7 +18,7 @@ unsigned long long int mul(unsigned long long int a,unsigned long long int b,uns
     return ans;
 }
 
-bool Miller_Rabin(unsigned long long int n)
+bool Miller_Rabin(uint64_t n)
 {
     if (n == 2 || n == 3)
     {
@@ -28,14 +28,14 @@ bool Miller_Rabin(unsigned long long int n)
     {
         return false;
     }
-    unsigned long long int m = n - 1, k = 0;
+    uint64_t m = n - 1, k = 0;
     while (m % 2 == 0)
     {
         m /= 2;
         k++;
     }
-    unsigned long long int a = (rand() % (n - 1)) + 1;
-    unsigned long long int b = 1;
+    uint64_t a = (rand() % (n - 1)) + 1;
+    uint64_t b = 1;
     while (m)
     {
         if (m & 1)
@@ -49,7 +49,7 @@ bool Miller_Rabin(unsigned long long int n)
     {
         return true;
     }
-    for (unsigned long long int i = 0; i < k; i++)
+    for (uint64_t i = 0; i < k; i++)
     {
         if (b == n - 1)
         {
@@ -61,7 +61,7 @@ bool Miller_Rabin(unsigned long long int n)
 }
 int main()
 {
-    unsigned long long int n;
+    uint64_t n;
     cin >> n;
     for(int i = 0; i < 10; i++)
     {
