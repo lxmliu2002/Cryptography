@@ -1,7 +1,5 @@
-#include <bits/stdc++.h>
+#include <iostream>
 using namespace std;
-
-int64_t mod = 0;
 
 int64_t mul(int64_t a, int64_t b, int64_t n)
 {
@@ -55,41 +53,22 @@ class Node
 {
 public:
     int64_t x, y;
-    bool isInf; // whether it is an infinite point
+    bool isInf;
     Node();
     Node(int64_t x, int64_t y);
     Node(int64_t x, int64_t y, bool isInf);
 };
 
-Node::Node(): x(0), y(0), isInf(false) {}
-Node::Node(int64_t x, int64_t y): x(x), y(y), isInf(false) {}
-Node::Node(int64_t x, int64_t y, bool isInf): x(x), y(y), isInf(isInf) {}
+Node::Node() : x(0), y(0), isInf(false) {}
+Node::Node(int64_t x, int64_t y) : x(x), y(y), isInf(false) {}
+Node::Node(int64_t x, int64_t y, bool isInf) : x(x), y(y), isInf(isInf) {}
 
-class Elliptic_Curve
+bool isInverse(Node p1, Node p2, int64_t p)
 {
-private:
-    int64_t a, b, p;
-
-public:
-    Elliptic_Curve(int64_t a, int64_t b, int64_t p);
-    bool isInverse(const Node &p1, const Node &p2); // check if two points are inverses
-    Node add(const Node &p1, const Node &p2);      // perform point addition
-    Node addKTimes(Node p, int64_t k);              // perform point multiplication by k
-};
-
-Elliptic_Curve::Elliptic_Curve(int64_t a, int64_t b, int64_t p)
-{
-    this->a = a;
-    this->b = b;
-    this->p = p;
+    return (p1.x - p2.x) % p == 0 && (p1.y + p2.y) % p == 0;
 }
 
-bool Elliptic_Curve::isInverse(const Node &p1, const Node &p2)
-{
-    return (p1.x - p2.x) % mod == 0 && (p1.y + p2.y) % mod == 0;
-}
-
-Node Elliptic_Curve::add(const Node &p1, const Node &p2)
+Node add(Node p1, Node p2, int64_t a, int64_t p)
 {
     if (p1.isInf)
     {
@@ -99,123 +78,121 @@ Node Elliptic_Curve::add(const Node &p1, const Node &p2)
     {
         return p1;
     }
-    else if (isInverse(p1, p2))
+    else if (isInverse(p1, p2, p))
     {
         Node tmp(-1, -1, true);
+        return tmp;
+    }
+    else if ((p1.x - p2.x) % p == 0)
+    {
+        Node tmp;
+        int64_t t1 = mul(p1.x, p1.x, p);
+        t1 = mul(3, t1, p);
+        t1 = (t1 + a) % p;
+        int64_t t2 = mul(p1.y, 2, p);
+        t2 = Multiplicative_Inverse(t2, p);
+        int64_t k = mul(t1, t2, p);
+        if (k < 0)
+        {
+            k += p;
+        }
+
+        int64_t x3 = mul(k, k, p);
+        x3 -= p1.x;
+        if (x3 < 0)
+        {
+            x3 += p;
+        }
+        x3 -= p2.x;
+        if (x3 < 0)
+        {
+            x3 += p;
+        }
+        tmp.x = x3;
+
+        t1 = p1.x - x3;
+        if (t1 < 0)
+        {
+            t1 += p;
+        }
+        int64_t y3 = mul(k, t1, p);
+        y3 -= p1.y;
+        if (y3 < 0)
+        {
+            y3 += p;
+        }
+        tmp.y = y3;
+
+        // int64_t k = ((3 * p1.x * p1.x + a) * Multiplicative_Inverse(2 * p1.y, pp) % pp + pp) % pp;
+        // int64_t x3 = ((k * k - 2 * p1.x) % pp + pp) % pp;
+        // int64_t y3 = ((k * (p1.x - x3) - p1.y) % pp + pp) % pp;
+
         return tmp;
     }
     else
     {
         Node tmp;
-        if ((p1.x - p2.x) % mod == 0)
+        int64_t t1 = p2.y - p1.y;
+        if (t1 < 0)
         {
-            int64_t t1 = mul(p1.x, p1.x, mod);
-            t1 = mul(3, t1, mod);
-            t1 = (t1 + a) % mod;
-            int64_t t2 = mul(p1.y, 2, mod);
-            t2 = Multiplicative_Inverse(t2, mod);
-            int64_t k = mul(t1, t2, mod);
-            if (k < 0)
-            {
-                k += mod;
-            }
-
-            int64_t x3 = mul(k, k, mod);
-            x3 -= p1.x;
-            if (x3 < 0)
-            {
-                x3 += mod;
-            }
-            x3 -= p2.x;
-            if (x3 < 0)
-            {
-                x3 += mod;
-            }
-            tmp.x = x3;
-
-            t1 = p1.x - x3;
-            if (t1 < 0)
-            {
-                t1 += mod;
-            }
-            int64_t y3 = mul(k, t1, mod);
-            y3 -= p1.y;
-            if (y3 < 0)
-            {
-                y3 += mod;
-            }
-            tmp.y = y3;
-
-            // int64_t k = ((3 * p1.x * p1.x + a) * Multiplicative_Inverse(2 * p1.y, pp) % pp + pp) % pp;
-            // int64_t x3 = ((k * k - 2 * p1.x) % pp + pp) % pp;
-            // int64_t y3 = ((k * (p1.x - x3) - p1.y) % pp + pp) % pp;
-
-            return tmp;
+            t1 += p;
         }
-        else
+        int64_t t2 = p2.x - p1.x;
+        if (t2 < 0)
         {
-            int64_t t1 = p2.y - p1.y;
-            if (t1 < 0)
-            {
-                t1 += mod;
-            }
-            int64_t t2 = p2.x - p1.x;
-            if (t2 < 0)
-            {
-                t2 += mod;
-            }
-            t2 = Multiplicative_Inverse(t2, mod);
-            int64_t k = mul(t1, t2, mod);
-            if (k < 0)
-            {
-                k += mod;
-            }
-
-            int64_t x3 = mul(k, k, mod);
-            x3 -= p1.x;
-            if (x3 < 0)
-            {
-                x3 += mod;
-            }
-            x3 -= p2.x;
-            if (x3 < 0)
-            {
-                x3 += mod;
-            }
-            tmp.x = x3;
-
-            t1 = p1.x - x3;
-            if (t1 < 0)
-            {
-                t1 += mod;
-            }
-            int64_t y3 = mul(k, t1, mod);
-            y3 -= p1.y;
-            if (y3 < 0)
-            {
-                y3 += mod;
-            }
-            tmp.y = y3;
-
-            // int64_t k = ((p2.y - p1.y) * Multiplicative_Inverse(p2.x - p1.x, pp) % pp + pp) % pp;
-            // int64_t x3 = ((k * k - p1.x - p2.x) % pp + pp) % pp;
-            // int64_t y3 = ((k * (p1.x - x3) - p1.y) % pp + pp) % pp;
-
-            return tmp;
+            t2 += p;
         }
+        t2 = Multiplicative_Inverse(t2, p);
+        int64_t k = mul(t1, t2, p);
+        if (k < 0)
+        {
+            k += p;
+        }
+
+        int64_t x3 = mul(k, k, p);
+        x3 -= p1.x;
+        if (x3 < 0)
+        {
+            x3 += p;
+        }
+        x3 -= p2.x;
+        if (x3 < 0)
+        {
+            x3 += p;
+        }
+        tmp.x = x3;
+
+        t1 = p1.x - x3;
+        if (t1 < 0)
+        {
+            t1 += p;
+        }
+        int64_t y3 = mul(k, t1, p);
+        y3 -= p1.y;
+        if (y3 < 0)
+        {
+            y3 += p;
+        }
+        tmp.y = y3;
+
+        // int64_t k = ((p2.y - p1.y) * Multiplicative_Inverse(p2.x - p1.x, pp) % pp + pp) % pp;
+        // int64_t x3 = ((k * k - p1.x - p2.x) % pp + pp) % pp;
+        // int64_t y3 = ((k * (p1.x - x3) - p1.y) % pp + pp) % pp;
+
+        return tmp;
     }
 }
 
-Node Elliptic_Curve::addKTimes(Node p, int64_t k)
+Node addKTimes(Node pp, int64_t k, int64_t a, int64_t p)
 {
     Node tmp(-1, -1, true);
     while (k)
     {
         if (k & 1)
         {
-            tmp = add(tmp, p);
+            tmp = add(tmp, pp, a, p);
         }
-        p = add(p, p);
+        pp = add(pp, pp, a, p);
         k >>= 1;
     }
     return tmp;
@@ -223,14 +200,13 @@ Node Elliptic_Curve::addKTimes(Node p, int64_t k)
 
 int main()
 {
-    int64_t a, b;
-    cin >> a >> b >> mod;
-    Elliptic_Curve ecc(a, b, mod);
+    int64_t a, b, p;
+    cin >> a >> b >> p;
     int64_t x, y, k;
     cin >> x >> y >> k;
     Node node(x, y, false);
-    Node result = ecc.addKTimes(node, k);
-    if(result.isInf)
+    Node result = addKTimes(node, k, a, p);
+    if (result.isInf)
     {
         cout << "-1 -1";
     }
