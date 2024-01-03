@@ -49,7 +49,6 @@ int64_t Multiplicative_Inverse(int64_t a, int64_t p)
     return (s + p) % p;
 }
 
-// TODO
 int64_t Hash(int64_t x, int64_t base, int64_t q)
 {
     int64_t result = 1;
@@ -64,18 +63,6 @@ int64_t Hash(int64_t x, int64_t base, int64_t q)
     }
     return result;
 }
-
-// unsigned long long Quick_Power(unsigned long long a, unsigned long long n, unsigned long long mod) {
-// 	unsigned long long result = 1;
-// 	while (n) {
-// 		if (n & 1) {
-// 			result = Quick_Multiply(a, result, mod);//result=(result*a)%mod
-// 		}
-// 		a = Quick_Multiply(a, a, mod);//a=(a*a)%mod
-// 		n >>= 1;
-// 	}
-// 	return result % mod;
-// }
 
 class Node
 {
